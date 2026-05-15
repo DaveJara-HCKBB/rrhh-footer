@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* ============================================================
+       ZONA DE CONFIGURACIÓN — edita solo aquí
+       ============================================================ */
+    :root {
+      --icon-url: url('https://drive.google.com/uc?export=view&id=1QYzyxTpdp-AReOcMKBUYSWPNMh60dYrs'); /* ← URL del ícono en Drive */
+      --bg-start: #1e3a8a;
+      --bg-end:   #6d28d9;
+      --accent:   #8b5cf6;
+      --text-color: #ffffff;
+      --glow: rgba(139, 92, 246, 0.5);
+
+      /* Tiempos de animación — ajusta solo estos valores */
+      --delay-r1:   0.5s;   /* 1ª R */
+      --delay-r2:   1.0s;   /* 2ª R */
+      --delay-h1:   1.5s;   /* 1ª H */
+      --delay-h2:   2.0s;   /* 2ª H */
+      --delay-sep:  2.4s;   /* Separador */
+      --delay-ges:  2.8s;   /* GESTIÓN (después de RRHH) */
+      --delay-ico:  3.0s;   /* Iconos laterales */
+      --delay-shine:3.4s;   /* Brillo */
+
+      /* Duración total del ciclo de animación antes de reiniciar */
+      --cycle-total: 17s;   /* 5s intro + 12s pausa = ciclo cómodo */
+    }
+    /* ============================================================ */
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: transparent;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      overflow: hidden;
+    }
+
+    .banner-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 10px;
+    }
+
+    /* MEJORA 2: altura reducida un tercio (120px → 80px) */
+    .banner {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 80px;
+      background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(30, 58, 138, 0.4),
+                  0 0 60px rgba(109, 40, 217, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .banner::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 50%, rgba(37, 99, 235, 0.1) 0%, transparent 50%);
+      opacity: 0;
+      animation: bgFade 2s ease 0.5s forwards;
+    }
+
+    @keyframes bgFade { to { opacity: 1; } }
+
+    .banner::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 200%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+      animation: topLine var(--cycle-total) ease-in-out 1.5s infinite;
+    }
+
+    @keyframes topLine {
+      0%   { left: -100%; }
+      17%  { left: 100%; }
+      100% { left: 100%; }
+    }
+
+    .bottom-line {
+      position: absolute;
+      bottom: 0;
+      left: -100%;
+      width: 200%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.8), transparent);
+      animation: bottomLine var(--cycle-total) ease-in-out 1.8s infinite;
+    }
+
+    @keyframes bottomLine {
+      0%   { left: -100%; }
+      17%  { left: 100%; }
+      100% { left: 100%; }
+    }
+
+    /* ICONOS IZQUIERDA */
+    .icons-left {
+      position: absolute;
+      left: 30px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      opacity: 0;
+      animation: slideInLeft 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) var(--delay-ico) forwards,
+                 iconCycle var(--cycle-total) ease-in-out var(--delay-ico) infinite;
+    }
+
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-40px) scale(0.5); }
+      to   { opacity: 1; transform: translateX(0) scale(1); }
+    }
+
+    @keyframes iconCycle {
+      0%   { opacity: 0; transform: translateX(-40px) scale(0.5); }
+      5%   { opacity: 1; transform: translateX(0) scale(1); }
+      85%  { opacity: 1; transform: translateX(0) scale(1); }
+      90%  { opacity: 0; transform: translateX(-40px) scale(0.5); }
+      100% { opacity: 0; transform: translateX(-40px) scale(0.5); }
+    }
+
+    .icon-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+
+    .icon-circle:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.15);
+      box-shadow: 0 0 20px var(--glow);
+    }
+
+    .icon-circle svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--text-color);
+      stroke-width: 1.8;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* MEJORA 1: Ícono configurable via CSS + imagen */
+    .icon-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    /* ICONOS DERECHA */
+    .icons-right {
+      position: absolute;
+      right: 30px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      opacity: 0;
+      animation: slideInRight 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) calc(var(--delay-ico) + 0.2s) forwards,
+                 iconCycleRight var(--cycle-total) ease-in-out calc(var(--delay-ico) + 0.2s) infinite;
+    }
+
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(40px) scale(0.5); }
+      to   { opacity: 1; transform: translateX(0) scale(1); }
+    }
+
+    @keyframes iconCycleRight {
+      0%   { opacity: 0; transform: translateX(40px) scale(0.5); }
+      5%   { opacity: 1; transform: translateX(0) scale(1); }
+      85%  { opacity: 1; transform: translateX(0) scale(1); }
+      90%  { opacity: 0; transform: translateX(40px) scale(0.5); }
+      100% { opacity: 0; transform: translateX(40px) scale(0.5); }
+    }
+
+    /* TEXTO CENTRAL — RRHH */
+    .text-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+
+    /* MEJORA 3a: GESTIÓN al mismo tamaño que RRHH */
+    .letter {
+      font-size: 42px;
+      font-weight: 800;
+      color: var(--text-color);
+      opacity: 0;
+      transform: scale(0) rotate(-20deg);
+      text-shadow: 0 0 30px rgba(139, 92, 246, 0.6);
+      display: inline-block;
+    }
+
+    /* MEJORA 4: animación cíclica con pausa de 12s */
+    .letter:nth-child(1) {
+      animation: letterCycle var(--cycle-total) cubic-bezier(0.175, 0.885, 0.32, 1.275) var(--delay-r1) infinite;
+    }
+    .letter:nth-child(2) {
+      animation: letterCycle var(--cycle-total) cubic-bezier(0.175, 0.885, 0.32, 1.275) var(--delay-r2) infinite;
+    }
+    .letter:nth-child(3) {
+      animation: letterCycle var(--cycle-total) cubic-bezier(0.175, 0.885, 0.32, 1.275) var(--delay-h1) infinite;
+    }
+    .letter:nth-child(4) {
+      animation: letterCycle var(--cycle-total) cubic-bezier(0.175, 0.885, 0.32, 1.275) var(--delay-h2) infinite;
+    }
+
+    @keyframes letterCycle {
+      0%   { opacity: 0; transform: scale(0) rotate(-20deg) translateY(-30px); }
+      3%   { transform: scale(1.3) rotate(5deg) translateY(-5px); }
+      4%   { opacity: 1; transform: scale(1) rotate(0deg) translateY(0); }
+      80%  { opacity: 1; transform: scale(1) rotate(0deg) translateY(0); }
+      85%  { opacity: 0; transform: scale(0) rotate(-20deg) translateY(-30px); }
+      100% { opacity: 0; transform: scale(0) rotate(-20deg) translateY(-30px); }
+    }
+
+    /* SEPARADOR */
+    .separator {
+      width: 3px;
+      height: 0;
+      background: linear-gradient(180deg, transparent, rgba(255,255,255,0.8), transparent);
+      margin: 0 16px;
+      border-radius: 2px;
+      animation: separatorCycle var(--cycle-total) ease var(--delay-sep) infinite;
+    }
+
+    @keyframes separatorCycle {
+      0%   { height: 0;    opacity: 0; }
+      3%   { height: 50px; opacity: 1; }
+      80%  { height: 50px; opacity: 1; }
+      85%  { height: 0;    opacity: 0; }
+      100% { height: 0;    opacity: 0; }
+    }
+
+    /* MEJORA 3b: GESTIÓN aparece DESPUÉS de RRHH y al mismo tamaño */
+    .gestion-container {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .gestion-text {
+      font-size: 42px;          /* igual que .letter */
+      font-weight: 800;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.95);
+      text-shadow: 0 0 30px rgba(139, 92, 246, 0.6);
+      opacity: 0;
+      transform: translateX(-60px);
+      animation: gestionCycle var(--cycle-total) cubic-bezier(0.175, 0.885, 0.32, 1.275) var(--delay-ges) infinite;
+    }
+
+    @keyframes gestionCycle {
+      0%   { opacity: 0; transform: translateX(-60px); }
+      4%   { opacity: 1; transform: translateX(0); }
+      80%  { opacity: 1; transform: translateX(0); }
+      85%  { opacity: 0; transform: translateX(-60px); }
+      100% { opacity: 0; transform: translateX(-60px); }
+    }
+
+    /* BRILLO */
+    .shine-bar {
+      position: absolute;
+      top: 0;
+      left: -60%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(
+        105deg,
+        transparent 0%,
+        transparent 40%,
+        rgba(255, 255, 255, 0.08) 45%,
+        rgba(255, 255, 255, 0.15) 50%,
+        rgba(255, 255, 255, 0.08) 55%,
+        transparent 60%,
+        transparent 100%
+      );
+      transform: skewX(-20deg);
+      animation: shineCycle var(--cycle-total) ease var(--delay-shine) infinite;
+    }
+
+    @keyframes shineCycle {
+      0%   { left: -60%; opacity: 1; }
+      12%  { left: 120%; opacity: 1; }
+      80%  { left: 120%; opacity: 0; }
+      99%  { left: -60%; opacity: 0; }
+      100% { left: -60%; opacity: 1; }
+    }
+
+    /* PARTÍCULAS */
+    .particle {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.6);
+      opacity: 0;
+    }
+
+    .particle:nth-child(1) { top: 20%; left: 15%; animation: particleFade 2s ease 3.5s infinite; }
+    .particle:nth-child(2) { top: 70%; left: 85%; animation: particleFade 2s ease 3.8s infinite; }
+    .particle:nth-child(3) { top: 30%; left: 75%; animation: particleFade 2s ease 4.1s infinite; }
+    .particle:nth-child(4) { top: 75%; left: 25%; animation: particleFade 2s ease 4.4s infinite; }
+
+    @keyframes particleFade {
+      0%, 100% { opacity: 0; transform: scale(0); }
+      50%       { opacity: 1; transform: scale(1); }
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .banner    { height: 60px; }
+      .letter    { font-size: 26px; }
+      .gestion-text { font-size: 26px; letter-spacing: 2px; }
+      .icons-left, .icons-right { display: none; }
+      .separator { margin: 0 10px; }
+    }
+
+    @media (max-width: 480px) {
+      .banner    { height: 48px; border-radius: 12px; }
+      .letter    { font-size: 20px; }
+      .gestion-text { font-size: 20px; letter-spacing: 1px; }
+      .separator { margin: 0 6px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="banner-wrapper">
+    <div class="banner">
+
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+
+      <div class="shine-bar"></div>
+      <div class="bottom-line"></div>
+
+      <!-- ICONOS IZQUIERDA -->
+      <!-- MEJORA 1: primer círculo usa el ícono configurable (usuario.png) -->
+      <!-- Para cambiarlo: reemplaza el src de la etiqueta <img> abajo -->
+      <div class="icons-left">
+        <div class="icon-circle">
+          <!-- ÍCONO CONFIGURABLE: cambia este src por la URL de tu imagen -->
+          <img
+            class="icon-img"
+            src="https://drive.google.com/uc?export=view&id=1QYzyxTpdp-AReOcMKBUYSWPNMh60dYrs"
+            alt="Gestión de usuarios"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+          />
+          <!-- Fallback SVG si el ícono no carga -->
+          <svg style="display:none" viewBox="0 0 24 24">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </div>
+        <div class="icon-circle">
+          <svg viewBox="0 0 24 24">
+            <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+            <line x1="9"  y1="6"  x2="9"  y2="6.01"></line>
+            <line x1="15" y1="6"  x2="15" y2="6.01"></line>
+            <line x1="9"  y1="10" x2="9"  y2="10.01"></line>
+            <line x1="15" y1="10" x2="15" y2="10.01"></line>
+            <line x1="9"  y1="14" x2="9"  y2="14.01"></line>
+            <line x1="15" y1="14" x2="15" y2="14.01"></line>
+            <path d="M10 22v-4h4v4"></path>
+          </svg>
+        </div>
+      </div>
+
+      <!-- TEXTO CENTRAL -->
+      <div class="text-container">
+        <span class="letter">R</span>
+        <span class="letter">R</span>
+        <span class="letter">H</span>
+        <span class="letter">H</span>
+
+        <div class="separator"></div>
+
+        <div class="gestion-container">
+          <span class="gestion-text">Gestión</span>
+        </div>
+      </div>
+
+      <!-- ICONOS DERECHA -->
+      <div class="icons-right">
+        <div class="icon-circle">
+          <svg viewBox="0 0 24 24">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+          </svg>
+        </div>
+        <div class="icon-circle">
+          <svg viewBox="0 0 24 24">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+</html>
